@@ -1,6 +1,7 @@
 import { JavaGenerator, JAVA_CONSTRAINTS_PRESET } from '../../src';
 
 const generator = new JavaGenerator({
+  collectionType: 'List',
   presets: [
     {
       preset: JAVA_CONSTRAINTS_PRESET,
@@ -12,15 +13,55 @@ const generator = new JavaGenerator({
 });
 const jsonSchemaDraft7 = {
   $schema: 'http://json-schema.org/draft-07/schema#',
-  $id: 'JakartaAnnotation',
+  $id: 'Person',
   type: 'object',
   properties: {
-    min_number_prop: { type: 'number', minimum: 0 },
-    max_number_prop: { type: 'number', exclusiveMaximum: 100 },
-    array_prop: { type: 'array', minItems: 2, maxItems: 3 },
-    string_prop: { type: 'string', pattern: '^I_', minLength: 3 }
+    first_name: { type: 'string' },
+    last_name: { type: 'string' },
+    age: { type: 'number' },
+    website: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        url: { type: 'string', format: 'uri' }
+      },
+      required: ['name', 'url'],
+      additionalProperties: false
+    },
+    home_address: {
+      $ref: '#/components/schemas/Address'
+    },
+    work_addresses: {
+      type: 'array',
+      items: { $ref: '#/components/schemas/Address' },
+      minItems: 1,
+      maxItems: 5
+    }
   },
-  required: ['min_number_prop', 'max_number_prop']
+  required: ['first_name', 'last_name', 'age', 'home_address'],
+  additionalProperties: false,
+  components: {
+    schemas: {
+      Address: {
+        $id: 'Address',
+        type: 'object',
+        properties: {
+          street_address: {
+            type: 'string'
+          },
+          city: {
+            type: 'string'
+          },
+          state: {
+            type: 'string'
+          }
+        },
+        required: ['street_address', 'city'],
+        additionalProperties: false
+      }
+    }
+  }
+
 };
 
 export async function generate(): Promise<void> {
